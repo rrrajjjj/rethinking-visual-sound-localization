@@ -1,11 +1,15 @@
 import glob
 import xml.etree.ElementTree as ET
+from pathlib import Path
+
 
 import librosa
 import numpy as np
 import pandas as pd
 from PIL import Image
 from torch.utils.data import IterableDataset
+from rethinking_visual_sound_localization.eval_utils import parse_annot
+
 
 
 class FlickrSoundNetDataset(IterableDataset):
@@ -51,3 +55,38 @@ class FlickrSoundNetDataset(IterableDataset):
             gt_map /= 2
             gt_map[gt_map > 1] = 1
             yield ft, img, audio, gt_map
+
+
+class UrbansasDataset(IterableDataset):
+    def __init__(self, data_root, phase = "valid"):
+        super(UrbansasDataset).__init__()
+        self.phase = phase
+        self.data_root = data_root
+        self.files = glob.glob("{}/Data/{}/*.wav".format(self.data_root, self.phase))
+        self.urbansas_test = [Path(f).stem for f in self.files]
+            
+    def __iter__(self):
+        for ft in self.urbansas_test:
+            img = Image.open(
+                [f for f in self.files if str(ft) in f][0].replace("wav", "jpg")
+            ).convert("RGB")
+
+            audio, _ = librosa.load(
+                [f for f in self.files if str(ft) in f][0]
+            )
+
+            bboxs = parse_annot("{}/Annotations/{}/{}.txt".format(self.data_root,self.phase, ft))
+            gt_map = np.zeros([224, 224])
+            
+            for item in bboxs:
+                item = [int(i) for i in item]
+                temp = np.zeros([224, 224])
+                temp[(item[1]) : item[3], item[0] : item[2]] = 1
+                gt_map += temp
+            gt_map /= 2
+            gt_map[gt_map > 1] = 1
+            yield ft, img, audio, gt_map
+
+
+
+

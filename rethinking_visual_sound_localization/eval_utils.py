@@ -120,3 +120,17 @@ def extract_text_embeddings(x, model, device="cpu"):
     text = clip.tokenize(x).to(device)
     text_features = model.encode_text(text)
     return text_features
+
+def parse_annot(path_to_annot):
+    """
+    parses a single annotation text file 
+    returns: a list of bounding boxes i.e. 4-tuples (x, y, w, h) 
+    """
+    
+    with open(path_to_annot) as f:
+        annotations = f.readlines()
+    annotations = [i.strip() for i in annotations]                     # remove newlines
+    annotations = [i.split(" ") for i in annotations]                  # convert strings to lists 
+    annotations = [i[1:] for i in annotations]                         # remove classes
+    bboxes = [[float(i) for i in bbox] for bbox in annotations]        # cast to float
+    return bboxes 
