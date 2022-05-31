@@ -7,7 +7,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 from torch.utils.data import DataLoader
 
-from rethinking_visual_sound_localization.training.data import AudioVisualDataset
+from rethinking_visual_sound_localization.training.data import AudioVisualDataset, AudioVisualDatasetUrbansas
 from rethinking_visual_sound_localization.training.data import worker_init_fn
 from rethinking_visual_sound_localization.training.model import RCGrad
 
@@ -22,10 +22,11 @@ if __name__ == "__main__":
         "num_workers": 8,
         "random_state": 2021,
         "args.debug": False,
+        "modal":"flow"
     }
     seed_everything(args["random_state"])
 
-    project_root = "PATH_TO_PROJECT_ROOT"
+    project_root = "../rcgrad_flow"
     os.makedirs(project_root, exist_ok=True)
     tensorboard_logger = TensorBoardLogger(save_dir="{}/logs/".format(project_root))
 
@@ -41,7 +42,8 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        accelerator="dp",
+        accelerator="ddp",
+        #accelerator="ddp_cpu",
         max_epochs=100,
     )
     train_loader = DataLoader(
@@ -51,7 +53,8 @@ if __name__ == "__main__":
         pin_memory=True,
         drop_last=True,
         worker_init_fn=worker_init_fn,
-    )
+    )    
+    
     valid_loader = DataLoader(
         AudioVisualDataset(data_root="PATH_TO_DATA_ROOT", split="valid", duration=5),
         num_workers=args["num_workers"],
@@ -61,5 +64,24 @@ if __name__ == "__main__":
         worker_init_fn=worker_init_fn,
     )
 
+    train_loader_flow = DataLoader(
+    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=1),
+    num_workers=args["num_workers"],
+    batch_size=args["batch_size"],
+    pin_memory=True,
+    drop_last=True,
+    worker_init_fn=worker_init_fn,
+    )
+
+
+    valid_loader_flow = DataLoader(
+        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=1),
+        num_workers=args["num_workers"],
+        batch_size=args["batch_size"],
+        pin_memory=True,
+        drop_last=False,
+        worker_init_fn=worker_init_fn,
+    )
+
     rc_grad = RCGrad(args)
-    trainer.fit(rc_grad, train_loader, valid_loader)
+    trainer.fit(rc_grad, train_loader_flow, valid_loader_flow)

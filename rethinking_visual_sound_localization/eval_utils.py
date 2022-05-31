@@ -96,7 +96,7 @@ def process_heatmap(heatmap):
     return pred
 
 
-def compute_metrics(preds, thres=0.5, at=0.5):
+def compute_metrics(preds, thres=0.5, at=0.3):
     metrics = {}
     ious = [cal_CIOU(pred, gt_map, thres=thres)[0] for _, pred, gt_map in preds]
 
@@ -126,7 +126,6 @@ def parse_annot(path_to_annot):
     parses a single annotation text file 
     returns: a list of bounding boxes i.e. 4-tuples (x, y, w, h) 
     """
-    
     with open(path_to_annot) as f:
         annotations = f.readlines()
     annotations = [i.strip() for i in annotations]                     # remove newlines

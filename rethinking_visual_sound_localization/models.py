@@ -1,3 +1,4 @@
+from tabnanny import check
 import clip
 import torch
 import wav2clip
@@ -20,10 +21,10 @@ MODEL_URL = "https://github.com/hohsiangwu/rethinking-visual-sound-localization/
 
 
 class RCGrad:
-    def __init__(self):
+    def __init__(self, modal="vision"):
         super(RCGrad).__init__()
 
-        image_encoder = resnet18(modal="vision", pretrained=False)
+        image_encoder = resnet18(modal=modal, pretrained=False)
         audio_encoder = ResNetSpec(
             BasicBlock,
             [2, 2, 2, 2],
@@ -37,6 +38,8 @@ class RCGrad:
         checkpoint = torch.hub.load_state_dict_from_url(
             MODEL_URL, map_location=device, progress=True
         )
+
+
         image_encoder.load_state_dict(
             {
                 k.replace("image_encoder.", ""): v

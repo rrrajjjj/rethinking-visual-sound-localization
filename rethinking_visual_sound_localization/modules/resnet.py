@@ -302,7 +302,7 @@ class ResNet(nn.Module):
             3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.conv1_flow = nn.Conv2d(
-            6, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+            4, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -382,6 +382,8 @@ class ResNet(nn.Module):
         # See note [TorchScript super()]
         if self.modal == "audio":
             x = self.conv1_a(x)
+        elif self.modal == "flow":
+            x = self.conv1_flow(x)
         else:
             x = self.conv1(x)
         x = self.bn1(x)
@@ -404,10 +406,17 @@ def _resnet(arch, block, layers, pretrained, progress, modal, **kwargs):
     model = ResNet(block, layers, modal, **kwargs)
     if pretrained:
         print("load pretrained res-18")
-        checkpoint = "https://download.pytorch.org/models/resnet18-5c106cde.pth"
-        model.load_state_dict(
-            torch.hub.load_state_dict_from_url(checkpoint, progress=False), strict=False
-        )
+        MODEL_URL = "https://download.pytorch.org/models/resnet18-5c106cde.pth"
+        checkpoint = torch.hub.load_state_dict_from_url(MODEL_URL, progress=False)
+
+        if modal == "flow": 
+            # reset the conv1_flow weights and dimensions in the checkpoint
+            conv1_wts = checkpoint["conv1.weight"]                                          # wts for rgb channels
+            conv1_flow_wts = torch.cat((conv1_wts, conv1_wts.mean(1).unsqueeze(1)), dim=1)  # init flow channel as avg of rgb
+            checkpoint["conv1_flow.weight"] = conv1_flow_wts
+        
+        model.load_state_dict(checkpoint, strict=False)
+
     return model
 
 

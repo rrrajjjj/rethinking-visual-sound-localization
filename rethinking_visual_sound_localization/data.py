@@ -58,11 +58,10 @@ class FlickrSoundNetDataset(IterableDataset):
 
 
 class UrbansasDataset(IterableDataset):
-    def __init__(self, data_root, phase = "valid"):
+    def __init__(self, data_root):
         super(UrbansasDataset).__init__()
-        self.phase = phase
         self.data_root = data_root
-        self.files = glob.glob("{}/Data/{}/*.wav".format(self.data_root, self.phase))
+        self.files = glob.glob("{}/Data/*.wav".format(self.data_root))
         self.urbansas_test = [Path(f).stem for f in self.files]
             
     def __iter__(self):
@@ -70,20 +69,22 @@ class UrbansasDataset(IterableDataset):
             img = Image.open(
                 [f for f in self.files if str(ft) in f][0].replace("wav", "jpg")
             ).convert("RGB")
+            w, h = img.size
 
             audio, _ = librosa.load(
                 [f for f in self.files if str(ft) in f][0]
             )
 
-            bboxs = parse_annot("{}/Annotations/{}/{}.txt".format(self.data_root,self.phase, ft))
+            bboxs = parse_annot("{}/Annotations/{}.txt".format(self.data_root,ft))
             gt_map = np.zeros([224, 224])
             
             for item in bboxs:
-                item = [int(i) for i in item]
+                x1, y1, bbox_w, bbox_h = int(item[0]/w*224), int(item[1]/h*224), int(item[2]/w*224), int(item[3]/h*224)
+                x2, y2 = x1+bbox_w, y1+bbox_h
                 temp = np.zeros([224, 224])
-                temp[(item[1]) : item[3], item[0] : item[2]] = 1
+                temp[y1:y2, x1:x2] = 1
                 gt_map += temp
-            gt_map /= 2
+            #gt_map /= 2
             gt_map[gt_map > 1] = 1
             yield ft, img, audio, gt_map
 

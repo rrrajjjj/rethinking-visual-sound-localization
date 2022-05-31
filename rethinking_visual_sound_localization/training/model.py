@@ -102,7 +102,8 @@ class RCGrad(LightningBase):
     ):
         super().__init__()
         self.args = args
-        self.image_encoder = resnet18(modal="vision", pretrained=True)
+        self.modal = self.args["modal"]
+        self.image_encoder = resnet18(modal=self.modal, pretrained=True)
         self.audio_encoder = ResNetSpec(
             BasicBlock,
             [2, 2, 2, 2],
