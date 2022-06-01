@@ -165,6 +165,8 @@ class AudioVisualDatasetUrbansas(IterableDataset):
             self.files = files[-250:]
         else:
             assert False
+        print(f"Split:{split}")
+        print(f"Number of files:{len(self.files)}")
 
 
     def __iter__(self):
