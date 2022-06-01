@@ -13,7 +13,7 @@ from rethinking_visual_sound_localization.training.model import RCGrad
 
 if __name__ == "__main__":
     args = {
-        "num_gpus": 0,
+        "num_gpus": 1,
         "batch_size": 256,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
@@ -42,7 +42,7 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        #accelerator="dp",
+        accelerator="dp",
         max_epochs=100,
     )
     train_loader = DataLoader(
