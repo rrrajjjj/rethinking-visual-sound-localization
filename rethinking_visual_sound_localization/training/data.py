@@ -53,7 +53,7 @@ def _transform_flow(n_px):
             Resize(n_px, interpolation=BICUBIC),
             CenterCrop(n_px),
             ToTensor(),
-            Normalize(0.5, 0.5),
+            Normalize(0.002, 0.07),
         ]
     )
 
@@ -193,7 +193,8 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                 video_subclip = video.subclip(video_index, video_index+1)
                 video_frame = video_subclip.get_frame(0.5)
                 video_frame2 = video_subclip.get_frame(0.5 + (1/self.fps) + 0.001)
-                flow = self.calculate_flow(video_frame, video_frame2)
+                flow = self.calculate_flow(video_frame, video_frame2)/256
+                print(np.max(flow), np.min(flow))
                 
                 if (audio[audio_slice].shape[0] == num_audio_samples):
 
