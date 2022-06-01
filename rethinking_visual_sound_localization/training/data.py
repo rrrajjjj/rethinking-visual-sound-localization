@@ -7,6 +7,7 @@ import librosa
 import numpy as np
 import skvideo.io
 import torch
+from tqdm import tqdm
 from PIL import Image
 import cv2 as cv
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -170,7 +171,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
 
 
     def __iter__(self):
-        for f in self.files:
+        for f in tqdm(self.files):
             audio, _ = librosa.load(
                 "{}/audio/{}.wav".format(self.data_root, f),
                 sr=self.sample_rate,
