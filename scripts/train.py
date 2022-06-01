@@ -42,7 +42,7 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        accelerator="ddp",
+        accelerator="dp",
         #accelerator="ddp_cpu",
         max_epochs=100,
     )
