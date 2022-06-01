@@ -22,7 +22,7 @@ if __name__ == "__main__":
         "num_workers": 8,
         "random_state": 2021,
         "args.debug": False,
-        "modal":"vision"
+        "modal":"flow"
     }
     seed_everything(args["random_state"])
 
