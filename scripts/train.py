@@ -69,7 +69,7 @@ if __name__ == "__main__":
     num_workers=args["num_workers"],
     batch_size=args["batch_size"],
     pin_memory=True,
-    drop_last=True,
+    drop_last=False,
     worker_init_fn=worker_init_fn,
     )
 
