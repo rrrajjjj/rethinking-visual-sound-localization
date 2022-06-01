@@ -146,6 +146,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
     def __init__(
         self,
         data_root,
+        modal: str = "flow",
         split: str = "train",
         duration: int = 5,
         sample_rate: int = 48000,
@@ -158,6 +159,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
         self.transform = _transform(224)
         self.transform_flow = _transform_flow(224)
         self.data_root = data_root
+        self.modal = modal
         
         files = self.get_overlapping_files()
         if split == "train":
@@ -183,7 +185,6 @@ class AudioVisualDatasetUrbansas(IterableDataset):
             except:
                 continue
             num_audio_samples = self.duration * self.sample_rate
-            num_video_samples = self.duration * self.fps
 
             if (audio.shape[0] >= num_audio_samples):
 
@@ -192,16 +193,18 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                 audio_slice = slice(audio_index, audio_index + num_audio_samples)
                 video_subclip = video.subclip(video_index, video_index+1)
                 video_frame = video_subclip.get_frame(0.5)
-                video_frame2 = video_subclip.get_frame(0.5 + (1/self.fps) + 0.001)
-                flow = self.calculate_flow(video_frame, video_frame2)/256
+                if self.modal == "flow":
+                    video_frame2 = video_subclip.get_frame(0.5 + (1/self.fps) + 0.001)
+                    flow = self.calculate_flow(video_frame, video_frame2)/256
                 
                 if (audio[audio_slice].shape[0] == num_audio_samples):
 
                     video_frame = self.transform(Image.fromarray(video_frame))
-                    flow = self.transform_flow(Image.fromarray(flow))
-                    video_frame_flow= torch.cat((video_frame, flow), dim=0)   
+                    if self.modal == "flow":
+                        flow = self.transform_flow(Image.fromarray(flow))
+                        video_frame = torch.cat((video_frame, flow), dim=0)   
         
-                    yield audio[audio_slice], video_frame_flow
+                    yield audio[audio_slice], video_frame
 
 
     def calculate_flow(self, img, img_next):

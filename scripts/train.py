@@ -13,8 +13,8 @@ from rethinking_visual_sound_localization.training.model import RCGrad
 
 if __name__ == "__main__":
     args = {
-        "num_gpus": 1,
-        "batch_size": 128,
+        "num_gpus": 0,
+        "batch_size": 256,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
         "early_stopping_patience": 10,
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         "num_workers": 8,
         "random_state": 2021,
         "args.debug": False,
-        "modal":"flow"
+        "modal":"vision"
     }
     seed_everything(args["random_state"])
 
@@ -42,8 +42,7 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        accelerator="dp",
-        #accelerator="ddp_cpu",
+        #accelerator="dp",
         max_epochs=100,
     )
     train_loader = DataLoader(
@@ -65,7 +64,7 @@ if __name__ == "__main__":
     )
 
     train_loader_flow = DataLoader(
-    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=1),
+    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=1, modal = args["modal"]),
     num_workers=args["num_workers"],
     batch_size=args["batch_size"],
     pin_memory=True,
@@ -75,7 +74,7 @@ if __name__ == "__main__":
 
 
     valid_loader_flow = DataLoader(
-        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=1),
+        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=1, modal = args["modal"]),
         num_workers=args["num_workers"],
         batch_size=args["batch_size"],
         pin_memory=True,
