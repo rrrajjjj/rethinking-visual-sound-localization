@@ -171,7 +171,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
 
 
     def __iter__(self):
-        for f in tqdm(self.files):
+        for f in (self.files):
             try:
                 audio, _ = librosa.load(
                     "{}/audio/{}.wav".format(self.data_root, f),
