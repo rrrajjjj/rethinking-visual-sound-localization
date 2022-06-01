@@ -199,6 +199,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                     video_frame_flow= torch.cat((video_frame, flow), dim=0)   
         
                     yield audio[audio_slice], video_frame_flow
+            return
 
     def calculate_flow(self, img, img_next):
         # convert images to grayscale
