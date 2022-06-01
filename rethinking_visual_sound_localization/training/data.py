@@ -172,13 +172,16 @@ class AudioVisualDatasetUrbansas(IterableDataset):
 
     def __iter__(self):
         for f in tqdm(self.files):
-            audio, _ = librosa.load(
-                "{}/audio/{}.wav".format(self.data_root, f),
-                sr=self.sample_rate,
-            )
-            video = VideoFileClip(
-                "{}/video/video_{}fps/{}.mp4".format(self.data_root, self.fps, f)
-            )
+            try:
+                audio, _ = librosa.load(
+                    "{}/audio/{}.wav".format(self.data_root, f),
+                    sr=self.sample_rate,
+                )
+                video = VideoFileClip(
+                    "{}/video/video_{}fps/{}.mp4".format(self.data_root, self.fps, f)
+                )
+            except:
+                continue
             num_audio_samples = self.duration * self.sample_rate
             num_video_samples = self.duration * self.fps
 
