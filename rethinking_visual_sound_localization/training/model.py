@@ -103,6 +103,7 @@ class RCGrad(LightningBase):
         super().__init__()
         self.args = args
         self.modal = self.args["modal"]
+        self.model_url = args["model_url"]
         self.image_encoder = resnet18(modal=self.modal, pretrained=True)
         self.audio_encoder = ResNetSpec(
             BasicBlock,
@@ -115,6 +116,27 @@ class RCGrad(LightningBase):
             norm_layer=None,
         )
         self.loss_fn = CLIPLoss1D()
+
+        if self.model_url:
+            checkpoint = torch.hub.load_state_dict_from_url(
+                        self.model_url, map_location=device, progress=True
+                        )
+            
+
+            self.image_encoder.load_state_dict(
+                {
+                    k.replace("image_encoder.", ""): v
+                    for k, v in checkpoint.items()
+                    if k.startswith("image_encoder")
+                }
+            )
+            self.audio_encoder.load_state_dict(
+                {
+                    k.replace("audio_encoder.", ""): v
+                    for k, v in checkpoint.items()
+                    if k.startswith("audio_encoder")
+                }
+            )
 
     def forward(self, audio, image):
         audio_output = self.audio_encoder(audio.float())

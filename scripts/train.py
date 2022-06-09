@@ -22,11 +22,13 @@ if __name__ == "__main__":
         "num_workers": 8,
         "random_state": 2021,
         "args.debug": False,
-        "modal":"flow"
+        "modal":"vision",
+        "model_url": "https://github.com/hohsiangwu/rethinking-visual-sound-localization/releases/download/v0.1.0-alpha/rc_grad.pt"
+        
     }
     seed_everything(args["random_state"])
 
-    project_root = "../rcgrad_flow"
+    project_root = "../rcgrad" if args["modal"] == "vision" else "../rcgrad_flow"
     os.makedirs(project_root, exist_ok=True)
     tensorboard_logger = TensorBoardLogger(save_dir="{}/logs/".format(project_root))
 

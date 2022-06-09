@@ -8,7 +8,6 @@ from torch import nn
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(
@@ -277,6 +276,11 @@ class ResNet(nn.Module):
         norm_layer=None,
     ):
         super(ResNet, self).__init__()
+        if modal == "flow":
+            flow_channels = 1
+        else:
+            flow_channels = 3
+    
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
@@ -302,7 +306,7 @@ class ResNet(nn.Module):
             3, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.conv1_flow = nn.Conv2d(
-            4, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
+            3+flow_channels, self.inplanes, kernel_size=7, stride=2, padding=3, bias=False
         )
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
