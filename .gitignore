@@ -1,5 +1,7 @@
 # evaluation
 evaluation/
+# logs
+../rcgrad_flow/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

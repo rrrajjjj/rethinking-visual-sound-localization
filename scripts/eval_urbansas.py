@@ -4,23 +4,39 @@ from PIL import Image
 import numpy as np
 import pandas as pd
 import os
+import torch
 
 from rethinking_visual_sound_localization.data import UrbansasDataset
 from rethinking_visual_sound_localization.eval_utils import compute_metrics, cal_CIOU
 from rethinking_visual_sound_localization.models import CLIPTran
 from rethinking_visual_sound_localization.models import RCGrad
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+FLOW_MODEL_PATH = "../rcgrad_flow/models/epoch=82-val_loss=3.4746.ckpt"
+checkpoint = torch.load(FLOW_MODEL_PATH, map_location=device)["state_dict"]
 
 def main():
     urbansas_dataset = UrbansasDataset(data_root = data_root)
 
     # get predictions
     if model == "rc_grad":
-        rc_grad = RCGrad()
+        if flow_channel:
+            rc_grad = RCGrad(modal="flow", checkpoint = checkpoint)
+        else:
+            rc_grad = RCGrad()
+    
         preds = []
         for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
-            preds.append((ft, rc_grad.pred_audio(img, audio), gt_map))
+            flow_norm = None
+            if flow_channel:
+                try:
+                    flow = np.array(Image.open(f"{data_root}Flow/{ft}.jpg").resize((224, 224)))
+                    flow_norm = (flow+5)/200
+                except:
+                    continue
+            
+            preds.append((ft, rc_grad.pred_audio(img, audio, flow_norm), gt_map))
     
     
     elif model == "flow":
@@ -34,15 +50,21 @@ def main():
 
     
     elif model == "rc_grad_flow":
-        rc_grad = RCGrad()
+        if flow_channel:
+            rc_grad = RCGrad(modal="flow", checkpoint = checkpoint)
+        else:
+            rc_grad = RCGrad()
+
         preds = []
         for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
-            try:
-                flow = np.array(Image.open(f"{data_root}Flow/{ft}.jpg").resize((224, 224)))
-            except:
-                continue
-            
-            pred = rc_grad.pred_audio(img, audio)
+            flow_norm = None
+            if flow_channel:
+                try:
+                    flow = np.array(Image.open(f"{data_root}Flow/{ft}.jpg").resize((224, 224)))
+                    flow_norm = (flow+5)/200
+                except:
+                    continue
+            pred = rc_grad.pred_audio(img, audio, flow_norm)
             pred*=flow
             preds.append((ft, pred, gt_map))
 
@@ -58,7 +80,9 @@ def main():
     iou_df = pd.DataFrame()
     iou_df["filename"] = filenames
     iou_df["iou"] = ious
-    iou_df.to_csv(f"evaluation/{model}.csv", index=None)
+    if_flow = "with_flow" if flow_channel else "without_flow"
+    os.makedirs(f"evaluation/{if_flow}", exist_ok=True)
+    iou_df.to_csv(f"evaluation/{if_flow}/{model}.csv", index=None)
 
     # compute metrics
     metrics = compute_metrics(preds)
@@ -73,9 +97,11 @@ if __name__ == "__main__":
     parser.add_argument('-filtered', '--f', action='store_true',
                         help='The filtered version of the dataset will be used if the argument is passed')
     parser.add_argument("-model", action = "store", default="rc_grad")
+    parser.add_argument("-flow_channel", action="store_true")
 
-    filtered = parser.parse_args().f    
-    model = parser.parse_args().model 
+    filtered = parser.parse_args().f
+    model = parser.parse_args().model
+    flow_channel = parser.parse_args().flow_channel
 
     dataset = "urbansas"
     if filtered:
@@ -84,6 +110,7 @@ if __name__ == "__main__":
 
     print(f"Using model - {model}")
     print(f"Dataset - {dataset}")
+    print(f"Flow Channel: {flow_channel}")
 
     # setup evaluation directory
     if not os.path.isdir("evaluation/"):

@@ -6,7 +6,7 @@ import wav2clip
 from .eval_utils import clean_pred
 from .eval_utils import extract_audio_embeddings
 from .eval_utils import extract_text_embeddings
-from .eval_utils import preprocess
+from .eval_utils import preprocess, preporcess_flow
 from .modules import transformer_mm_clip
 from .modules.gradcam import GradCAM
 from .modules.resnet import BasicBlock
@@ -18,10 +18,13 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 MODEL_URL = "https://github.com/hohsiangwu/rethinking-visual-sound-localization/releases/download/v0.1.0-alpha/rc_grad.pt"
+checkpoint = torch.hub.load_state_dict_from_url(
+            MODEL_URL, map_location=device, progress=True
+        )
 
 
 class RCGrad:
-    def __init__(self, modal="vision"):
+    def __init__(self, modal="vision", checkpoint = checkpoint):
         super(RCGrad).__init__()
 
         image_encoder = resnet18(modal=modal, pretrained=False)
@@ -34,9 +37,6 @@ class RCGrad:
             width_per_group=64,
             replace_stride_with_dilation=None,
             norm_layer=None,
-        )
-        checkpoint = torch.hub.load_state_dict_from_url(
-            MODEL_URL, map_location=device, progress=True
         )
 
 
@@ -63,10 +63,16 @@ class RCGrad:
             use_cuda=False,
             reshape_transform=None,
         )
+        self.modal=modal
 
-    def pred_audio(self, img, audio):
+    def pred_audio(self, img, audio, flow = None):
+        in_tensor = preprocess(img)
+        if self.modal == "flow":
+            in_flow = preporcess_flow(flow)
+            in_tensor = torch.cat((in_tensor, in_flow), dim=0)
+
         grayscale_cam = self.cam(
-            input_tensor=preprocess(img).unsqueeze(0),
+            input_tensor=in_tensor.unsqueeze(0).float(),
             targets=[self.audio_encoder(torch.from_numpy(audio).unsqueeze(0))],
         )
         pred_audio = grayscale_cam[0, :]

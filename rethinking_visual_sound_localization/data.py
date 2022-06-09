@@ -58,7 +58,7 @@ class FlickrSoundNetDataset(IterableDataset):
 
 
 class UrbansasDataset(IterableDataset):
-    def __init__(self, data_root):
+    def __init__(self, data_root, modal = "vision"):
         super(UrbansasDataset).__init__()
         self.data_root = data_root
         self.files = glob.glob("{}/Data/*.wav".format(self.data_root))

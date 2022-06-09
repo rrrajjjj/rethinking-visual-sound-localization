@@ -36,8 +36,18 @@ def _transform(n_px):
         ]
     )
 
+def _transform_flow(n_px):
+    return Compose(
+        [
+            #Resize(n_px, interpolation=BICUBIC),
+            ToTensor(),
+        ]
+    )
+
 
 preprocess = _transform(224)
+preporcess_flow = _transform_flow(224)
+
 
 
 def show_cam_on_image(img, mask):
