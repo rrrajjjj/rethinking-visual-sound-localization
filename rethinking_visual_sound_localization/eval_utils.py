@@ -1,5 +1,4 @@
 from collections import defaultdict
-
 import clip
 import cv2
 import numpy as np
