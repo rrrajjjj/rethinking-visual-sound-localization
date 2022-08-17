@@ -15,7 +15,7 @@ if __name__ == "__main__":
     args = {
         "data_root": "../../data/urbansas_unlabeled",
         "num_gpus": 1,
-        "batch_size": 256,
+        "batch_size": 128,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
         "early_stopping_patience": 10,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        accelerator="dp",
+        accelerator="auto",
         max_epochs=100,
     )
     train_loader = DataLoader(
