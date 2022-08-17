@@ -45,7 +45,7 @@ if __name__ == "__main__":
             ),
         ],
         gpus=args["num_gpus"],
-        accelerator="ddp",
+        accelerator="ddp_cpu",
         max_epochs=100,
     )
     train_loader = DataLoader(
