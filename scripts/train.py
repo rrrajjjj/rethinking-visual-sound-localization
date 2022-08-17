@@ -13,7 +13,7 @@ from rethinking_visual_sound_localization.training.model import RCGrad
 
 if __name__ == "__main__":
     args = {
-        "data_root":"../../data/urbansas_unlabeled",
+        "data_root": "../../data/urbansas_unlabeled",
         "num_gpus": 1,
         "batch_size": 256,
         "learning_rate": 0.001,
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     )
 
     train_loader_flow = DataLoader(
-    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=5, fps = 24,
+    AudioVisualDatasetUrbansas(data_root=args["data_root"], split="train", duration=5, fps = 24,
         modal = args["modal"]),
         num_workers=args["num_workers"],
         batch_size=args["batch_size"],
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
 
     valid_loader_flow = DataLoader(
-        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=5, fps = 24,
+        AudioVisualDatasetUrbansas(data_root=args["data_root"], split="valid", duration=5, fps = 24,
         modal = args["modal"]),
         num_workers=args["num_workers"],
         batch_size=args["batch_size"],

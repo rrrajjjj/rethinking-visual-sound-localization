@@ -117,7 +117,7 @@ class RCGrad(LightningBase):
         )
         self.loss_fn = CLIPLoss1D()
 
-        if self.model_url:
+        """if self.model_url:
             checkpoint = torch.hub.load_state_dict_from_url(
                         self.model_url, map_location=device, progress=True
                         )
@@ -136,7 +136,7 @@ class RCGrad(LightningBase):
                     for k, v in checkpoint.items()
                     if k.startswith("audio_encoder")
                 }
-            )
+            )"""
 
     def forward(self, audio, image):
         audio_output = self.audio_encoder(audio.float())
