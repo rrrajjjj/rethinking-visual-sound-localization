@@ -179,7 +179,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                     sr=self.sample_rate,
                 )
                 video = VideoFileClip(
-                    "{}/video/video_{}fps/{}.mp4".format(self.data_root, self.fps, f)
+                    "{}/video_{}fps/{}.mp4".format(self.data_root, self.fps, f)
                 )
             except:
                 continue
