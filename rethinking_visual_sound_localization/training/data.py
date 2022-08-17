@@ -162,9 +162,9 @@ class AudioVisualDatasetUrbansas(IterableDataset):
         
         files = self.get_overlapping_files()
         if split == "train":
-            self.files = files[:-250]
+            self.files = files[:-500]
         elif split == "valid":
-            self.files = files[-250:]
+            self.files = files[-500:]
         else:
             assert False
         print(f"Split:{split}")
