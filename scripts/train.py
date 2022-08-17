@@ -13,16 +13,17 @@ from rethinking_visual_sound_localization.training.model import RCGrad
 
 if __name__ == "__main__":
     args = {
+        "data_root":"../../data/urbansas_unlabeled",
         "num_gpus": 1,
         "batch_size": 256,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
-        "early_stopping_patience": 50,
+        "early_stopping_patience": 10,
         "optimizer": "Adam",
         "num_workers": 8,
         "random_state": 2021,
         "args.debug": False,
-        "modal":"vision",
+        "modal":"flow",
         "model_url": "https://github.com/hohsiangwu/rethinking-visual-sound-localization/releases/download/v0.1.0-alpha/rc_grad.pt"
         
     }
@@ -66,17 +67,19 @@ if __name__ == "__main__":
     )
 
     train_loader_flow = DataLoader(
-    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=1, modal = args["modal"]),
-    num_workers=args["num_workers"],
-    batch_size=args["batch_size"],
-    pin_memory=True,
-    drop_last=False,
-    worker_init_fn=worker_init_fn,
+    AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="train", duration=5, fps = 24,
+        modal = args["modal"]),
+        num_workers=args["num_workers"],
+        batch_size=args["batch_size"],
+        pin_memory=True,
+        drop_last=False,
+        worker_init_fn=worker_init_fn,
     )
 
 
     valid_loader_flow = DataLoader(
-        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=1, modal = args["modal"]),
+        AudioVisualDatasetUrbansas(data_root="../../data/urbansas", split="valid", duration=5, fps = 24,
+        modal = args["modal"]),
         num_workers=args["num_workers"],
         batch_size=args["batch_size"],
         pin_memory=True,

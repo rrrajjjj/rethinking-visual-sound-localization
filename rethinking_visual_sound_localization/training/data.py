@@ -145,7 +145,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
     def __init__(
         self,
         data_root,
-        modal: str = "flow",
+        modal: str = "vision",
         split: str = "train",
         duration: int = 5,
         sample_rate: int = 48000,
@@ -190,10 +190,16 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                 audio_index = random.randint(0, audio.shape[0] - num_audio_samples)
                 video_index = (audio_index / self.sample_rate)
                 audio_slice = slice(audio_index, audio_index + num_audio_samples)
-                video_subclip = video.subclip(video_index, video_index+1)
-                video_frame = video_subclip.get_frame(0.5)
+                video_subclip = video.subclip(video_index, video_index+self.duration)
+                video_frame = video_subclip.get_frame(0.5*self.duration)                  # get the middle frame
                 if self.modal == "flow":
-                    video_frame2 = video_subclip.get_frame(0.5 + (1/self.fps) + 0.001)
+                    # get next video frame (undersample to 8 fps if frame rate = 24 fps)
+                    # add small value to time stamp to ensure the next frame is extracted 
+                    if self.fps == 24:
+                        video_frame2 = video_subclip.get_frame(0.5*self.duration + (1/8) + 0.001)
+                    else:
+                        video_frame2 = video_subclip.get_frame(0.5*self.duration + (1/self.fps) + 0.001)
+
                     flow = self.calculate_flow(video_frame, video_frame2)
                 
                 if (audio[audio_slice].shape[0] == num_audio_samples):
@@ -204,7 +210,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                         video_frame = torch.cat((video_frame, flow), dim=0)   
                         if (torch.isnan(video_frame).any() or torch.isinf(video_frame).any()):
                             continue
-        
+                            
                     yield audio[audio_slice], video_frame
 
 

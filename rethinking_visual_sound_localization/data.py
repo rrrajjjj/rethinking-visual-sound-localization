@@ -52,7 +52,7 @@ class FlickrSoundNetDataset(IterableDataset):
                 temp = np.zeros([224, 224])
                 temp[item[1] : item[3], item[0] : item[2]] = 1
                 gt_map += temp
-            gt_map /= 2
+            #gt_map /= 2
             gt_map[gt_map > 1] = 1
             yield ft, img, audio, gt_map
 
