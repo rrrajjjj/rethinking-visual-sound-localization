@@ -414,6 +414,7 @@ def _resnet(arch, block, layers, pretrained, progress, modal, **kwargs):
         checkpoint = torch.hub.load_state_dict_from_url(MODEL_URL, progress=False)
 
         if modal == "flow": 
+            print("modal: Flow")
             # reset the conv1_flow weights and dimensions in the checkpoint
             conv1_wts = checkpoint["conv1.weight"]                                          # wts for rgb channels
             conv1_flow_wts = torch.cat((conv1_wts, conv1_wts.mean(1).unsqueeze(1)), dim=1)  # init flow channel as avg of rgb

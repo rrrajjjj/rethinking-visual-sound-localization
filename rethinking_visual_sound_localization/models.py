@@ -1,4 +1,3 @@
-from tabnanny import check
 import clip
 import torch
 import wav2clip
