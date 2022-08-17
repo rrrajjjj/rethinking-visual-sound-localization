@@ -229,6 +229,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
         return magnitude
 
     def get_overlapping_files(self):
+        print(self.data_root)
         audio_files = glob.glob("{}/audio/*.wav".format(self.data_root))
         video_files = glob.glob("{}/video/video_{}fps/*.mp4".format(self.data_root, self.fps))
         files = sorted(
