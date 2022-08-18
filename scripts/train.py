@@ -18,7 +18,7 @@ if __name__ == "__main__":
         "batch_size": 64,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
-        "early_stopping_patience": 10,
+        "early_stopping_patience": 50,
         "optimizer": "Adam",
         "num_workers": 8,
         "random_state": 2021,
