@@ -191,7 +191,10 @@ class AudioVisualDatasetUrbansas(IterableDataset):
                 video_index = (audio_index / self.sample_rate)
                 video_end = min(video.duration, video_index+self.duration)
                 audio_slice = slice(audio_index, audio_index + num_audio_samples)
-                video_subclip = video.subclip(video_index, video_end)
+                try:
+                    video_subclip = video.subclip(video_index, video_end)
+                except:
+                    continue
                 video_frame = video_subclip.get_frame(0.5*self.duration)                  # get the middle frame
                 if self.modal == "flow":
                     # get next video frame (undersample to 8 fps if frame rate = 24 fps)
