@@ -174,7 +174,7 @@ class AudioVisualDatasetUrbansas(IterableDataset):
     def __iter__(self):
         for f in (self.files):
             try:
-                audio, _ = librosa.load(
+                audio, _ = librosa.load(    
                     "{}/audio/{}.wav".format(self.data_root, f),
                     sr=self.sample_rate,
                 )
@@ -189,8 +189,9 @@ class AudioVisualDatasetUrbansas(IterableDataset):
 
                 audio_index = random.randint(0, audio.shape[0] - num_audio_samples)
                 video_index = (audio_index / self.sample_rate)
+                video_end = min(video.duration, video_index+self.duration)
                 audio_slice = slice(audio_index, audio_index + num_audio_samples)
-                video_subclip = video.subclip(video_index, video_index+self.duration)
+                video_subclip = video.subclip(video_index, video_end)
                 video_frame = video_subclip.get_frame(0.5*self.duration)                  # get the middle frame
                 if self.modal == "flow":
                     # get next video frame (undersample to 8 fps if frame rate = 24 fps)
