@@ -15,7 +15,7 @@ if __name__ == "__main__":
     args = {
         "data_root": "../../data/urbansas_unlabeled",
         "num_gpus": 1,
-        "batch_size": 128,
+        "batch_size": 64,
         "learning_rate": 0.001,
         "lr_scheduler_patience": 5,
         "early_stopping_patience": 10,
