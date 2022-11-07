@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import os
 import torch
-
+from rethinking_visual_sound_localization.yolo_utils import get_vision_baseline_pred, get_vision_topline_pred, generate_mask_from_pred
 from rethinking_visual_sound_localization.data import UrbansasDataset
 from rethinking_visual_sound_localization.eval_utils import compute_metrics, cal_CIOU
 from rethinking_visual_sound_localization.models import CLIPTran
@@ -58,12 +58,11 @@ def main():
         preds = []
         for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
             flow_norm = None
-            if flow_channel:
-                try:
-                    flow = np.array(Image.open(f"{data_root}Flow/{ft}.jpg").resize((224, 224)))
-                    flow_norm = (flow+5)/200
-                except:
-                    continue
+            try:
+                flow = np.array(Image.open(f"{data_root}Flow/{ft}.jpg").resize((224, 224)))
+                flow_norm = (flow+5)/200
+            except:
+                continue
             pred = rc_grad.pred_audio(img, audio, flow_norm)
             pred*=flow
             preds.append((ft, pred, gt_map))
@@ -74,6 +73,23 @@ def main():
         for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
             preds.append((ft, clip_tran.pred_audio(img, audio), gt_map))
 
+    elif model == "yolo_topline":
+        preds = []
+        for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
+            pred = get_vision_topline_pred(ft)
+            if pred is not None:
+                pred_mask = generate_mask_from_pred(pred)
+                preds.append((ft, pred_mask, gt_map))
+
+            
+    elif model == "yolo_baseline":
+        preds = []
+        for ft, img, audio, gt_map in tqdm.tqdm(urbansas_dataset):
+            pred = get_vision_baseline_pred(ft)
+            if pred is not None:
+                pred_mask = generate_mask_from_pred(pred)
+                preds.append((ft, pred_mask, gt_map))
+            
     # save image-wise cIoU
     ious = [cal_CIOU(pred, gt_map)[0] for _, pred, gt_map in preds]
     filenames = [ft for ft, _, _ in preds]
